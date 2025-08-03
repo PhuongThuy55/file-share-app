@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tải về File</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <style>
+        .container {
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container text-center">
+        <h1>Tải về File</h1>
+        <p class="mt-4">Bạn có thể tải về file **{{ filename }}** bằng cách nhấn vào nút dưới đây.</p>
+        <a href="{{ url_for('download_file_direct', filename=filename) }}" class="btn btn-success btn-lg mt-3">Tải về</a>
+    </div>
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+</body>
+</html>
