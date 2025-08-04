@@ -1,48 +1,37 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chia sẻ File</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <style>
-        .container {
-            margin-top: 50px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chia sẻ file</title>
+  <link href="/static/css/index.css">
+  <link href="hittps://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <h1 class="text-center">Chia sẻ File Đơn Giản</h1>
-        <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data" class="mt-4 p-4 border rounded">
-            <div class="mb-3">
-                <label for="file" class="form-label">Chọn File để tải lên:</label>
-                <input class="form-control" type="file" id="file" name="file" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Tải lên và Chia sẻ</button>
-        </form>
+  <div class="main-container text-center">
+    <!-- Logo -->
+    <img src="https://cdn-icons-png.flaticon.com/512/3050/3050525.png" alt="Logo" class="logo" height="40px">
+    <h2>Ứng dụng chia sẻ file</h2>
 
-        {% if filename %}
-            <div class="mt-4 p-3 bg-light rounded">
-                <h5>File của bạn đã được tải lên!</h5>
-                <p>Liên kết chia sẻ:</p>
-                <div class="input-group">
-                    <input type="text" class="form-control" value="{{ url_for('download_file', filename=filename, _external=True) }}" readonly id="shareLink">
-                    <button class="btn btn-outline-secondary" type="button" onclick="copyLink()">Sao chép</button>
-                </div>
-            </div>
-        {% endif %}
+    <!-- Menu nút -->
+    <div class="d-flex justify-content-center nav-buttons mb-4 mt-4">
+      <a href="/" class="btn btn-outline-primary">Trang chủ</a>
+      <a href="/upload" class="btn btn-outline-success">Tải lên file</a>
+      <a href="/download" class="btn btn-outline-info">Xem file đã tải</a>
     </div>
 
-    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-    <script>
-        function copyLink() {
-            var copyText = document.getElementById("shareLink");
-            copyText.select();
-            copyText.setSelectionRange(0, 99999);
-            document.execCommand("copy");
-            alert("Đã sao chép liên kết: " + copyText.value);
-        }
-    </script>
+    <!-- Thông điệp -->
+    <p class="text-center">
+      Chào mừng đến với hệ thống chia sẻ file an toàn và nhanh chóng.<br>
+      Vui lòng chọn chức năng bên trên để tiếp tục.
+    </p>
+
+    <!-- Footer -->
+    <footer>
+      © 2025 - Được phát triển bởi Bạn | Đồ án môn học
+    </footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
