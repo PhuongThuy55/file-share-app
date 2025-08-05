@@ -4,7 +4,7 @@ import os
 # Cấu hình
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'gif', 'zip', 'rar', 'mp4', 'mp3'}
-MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10 MB
+MAX_CONTENT_LENGTH = 100 * 1024 * 1024  # 10 MB
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
