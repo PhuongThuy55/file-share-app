@@ -1,0 +1,29 @@
+
+    body { 
+    background: #f5f7fa; 
+    font-family: 'Segoe UI', sans-serif; 
+    }
+    .card { 
+    max-width: 600px; 
+    margin: 80px auto; 
+    border-radius: 12px; 
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1); 
+    }
+    .btn-download { 
+        background: #1a73e8;
+        color: white; 
+        border:none; 
+        border-radius: 24px; 
+        padding: 10px 24px; 
+    }
+    .btn-download:hover {
+         background: #0c5ed7; 
+    }
+    .badge-info {
+         background: #e8f0fe; 
+         color: #1a73e8; 
+    }
+    .disabled-note {
+         color: #a0a0a0; 
+    }
+ 
