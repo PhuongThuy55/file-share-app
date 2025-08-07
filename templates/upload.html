@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
@@ -7,26 +7,140 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
-      background: linear-gradient(to right, #fdfbfb, #ebedee);
-      font-family: 'Segoe UI', sans-serif;
+      background-color: #f5f7fa;
+      font-family: 'Google Sans', 'Segoe UI', sans-serif;
+      color: #202124;
     }
 
     .upload-container {
-      background: white;
-      border-radius: 20px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 10px rgba(60,64,67,0.15);
       padding: 40px;
-      max-width: 600px;
+      max-width: 700px;
       margin: 80px auto;
+      transition: box-shadow 0.3s;
+    }
+
+    .upload-container:hover {
+      box-shadow: 0 4px 20px rgba(60,64,67,0.25);
+    }
+
+    h2 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 30px;
     }
 
     .form-control {
+      border-radius: 12px;
+      border: 1px solid #dadce0;
+      padding: 12px;
+      font-size: 15px;
       margin-bottom: 20px;
     }
 
-    .btn {
-      padding: 10px 20px;
+    .form-label {
       font-weight: 500;
+      margin-bottom: 6px;
+      display: block;
+      text-align: left;
+    }
+
+    .btn {
+      border-radius: 24px;
+      font-weight: 500;
+      padding: 10px 24px;
+      transition: transform 0.2s ease-in-out;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+    }
+
+    .btn-success {
+      background-color: #1a73e8;
+      border: none;
+    }
+
+    .btn-success:hover {
+      background-color: #0c5ed7;
+    }
+
+    .btn-outline-secondary, .btn-outline-info, .btn-outline-success {
+      border-radius: 24px;
+    }
+
+    .share-section {
+      margin-top: 30px;
+      text-align: left;
+    }
+
+    .share-section input {
+      font-size: 14px;
+      border-radius: 12px;
+      border: 1px solid #dadce0;
+      padding: 10px;
+    }
+
+    .alert-success {
+      border-radius: 16px;
+      border: none;
+      background: #e6f4ea;
+      color: #137333;
+    }
+
+    .mt-4 .btn {
+      font-size: 14px;
+    }
+
+    .btn-primary {
+      background-color: #1a73e8;
+      border: none;
+    }
+
+    .btn-primary:hover {
+      background-color: #0c5ed7;
+    }
+
+    .file-icon {
+      width: 36px;
+      height: 36px;
+      margin-right: 10px;
+    }
+
+    .share-popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      z-index: 1000;
+      width: 90%;
+      max-width: 400px;
+    }
+
+    .share-popup.show {
+      display: block;
+    }
+
+    .popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 999;
+      display: none;
+    }
+
+    .popup-overlay.show {
+      display: block;
     }
   </style>
 </head>
@@ -35,24 +149,455 @@
     <h2 class="mb-4">Tải lên file của bạn</h2>
 
     <form action="/upload" method="post" enctype="multipart/form-data">
-      <div class="mb-3">
-        <input class="form-control" type="file" name="file" required>
-      </div>
+      <input class="form-control" type="file" name="file" required>
+
+      <label class="form-label">Chế độ chia sẻ:</label>
+      <select class="form-control" name="privacy" required>
+        <option value="public">Công khai (Ai cũng có thể truy cập)</option>
+        <option value="private">Riêng tư (Chỉ bạn biết)</option>
+      </select>
+
+      <label class="form-label">Thời hạn tồn tại:</label>
+      <select class="form-control" name="expire_time">
+        <option value="1">1 ngày</option>
+        <option value="7">7 ngày</option>
+        <option value="30">30 ngày</option>
+        <option value="never" selected>Không xoá tự động</option>
+      </select>
+
+      <label class="form-label">Giới hạn số lượt tải (tuỳ chọn):</label>
+      <input type="number" class="form-control" name="download_limit" placeholder="Nhập số lượt tải tối đa">
+
+      <label class="form-label">Đặt mật khẩu truy cập (nếu cần):</label>
+      <input type="password" class="form-control" name="password" placeholder="Mật khẩu truy cập file">
+
       <button type="submit" class="btn btn-success">Tải lên</button>
     </form>
 
     {% if share_link %}
-    <div class="alert alert-success mt-4">
-      <strong>Link chia sẻ:</strong>
-      <input type="text" class="form-control mt-2" value="{{ share_link }}" readonly onclick="this.select();">
+    <div class="share-section alert alert-success">
+      <h5>🎉 File đã được tải lên thành công!</h5>
+      <div class="d-flex align-items-center mb-2">
+        <img src="/static/icons/file-icon.png" alt="icon" class="file-icon">
+        <input type="text" class="form-control" value="{{ share_link }}" readonly onclick="this.select();">
+      </div>
+      <button class="btn btn-primary mt-2" onclick="showSharePopup('{{ share_link }}')">🔗 Chia sẻ chi tiết</button>
     </div>
     {% endif %}
 
-    <div class="mt-4">
+    <div class="mt-4 d-flex justify-content-center gap-3">
       <a href="/" class="btn btn-outline-secondary">Quay lại</a>
+      <a href="/download" class="btn btn-outline-info">Xem file đã tải</a>
+      <a href="/upload" class="btn btn-outline-success">Tải lên khác</a>
     </div>
   </div>
+
+  <div class="popup-overlay" id="popupOverlay"></div>
+  <div class="share-popup" id="sharePopup">
+    <h5>🔗 Chi tiết chia sẻ file</h5>
+    <p class="mb-1">Link chia sẻ:</p>
+    <input type="text" class="form-control mb-2" id="popupShareLink" readonly>
+    <button class="btn btn-primary" onclick="navigator.clipboard.writeText(document.getElementById('popupShareLink').value)">📋 Sao chép</button>
+    <button class="btn btn-outline-secondary mt-2" onclick="closeSharePopup()">Đóng</button>
+  </div>
+
+  <script>
+    function showSharePopup(link) {
+      document.getElementById('popupShareLink').value = link;
+      document.getElementById('popupOverlay').classList.add('show');
+      document.getElementById('sharePopup').classList.add('show');
+    }
+
+    function closeSharePopup() {
+      document.getElementById('popupOverlay').classList.remove('show');
+      document.getElementById('sharePopup').classList.remove('show');
+    }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tải lên file</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f5f7fa;
+      font-family: 'Google Sans', 'Segoe UI', sans-serif;
+      color: #202124;
+    }
+    .upload-container {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 10px rgba(60,64,67,0.15);
+      padding: 40px;
+      max-width: 800px;
+      margin: 60px auto;
+      position: relative;
+    }
+    h2 {
+      font-size: 26px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    .form-label {
+      font-weight: 500;
+      margin-bottom: 6px;
+      display: block;
+      text-align: left;
+    }
+    .drag-drop {
+      border: 2px dashed #dfe1e6;
+      border-radius: 12px;
+      padding: 30px;
+      text-align: center;
+      color: #5f6368;
+      margin-bottom: 15px;
+      cursor: pointer;
+      transition: background .2s, border-color .2s;
+      position: relative;
+    }
+    .drag-drop.dragover {
+      background-color: #e8f0fe;
+      border-color: #1a73e8;
+      color: #1a73e8;
+    }
+    .form-control, .form-select {
+      border-radius: 12px;
+      border: 1px solid #dadce0;
+      padding: 10px 14px;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+    .btn {
+      border-radius: 24px;
+      font-weight: 500;
+      padding: 10px 22px;
+      transition: transform .2s ease-in-out;
+    }
+    .btn:hover { transform: scale(1.03); }
+    .btn-primary { background: #1a73e8; border: none; color: #fff; }
+    .btn-primary:hover { background: #0c5ed7; }
+    .btn-outline-secondary, .btn-outline-info, .btn-outline-success {
+      border-radius: 24px;
+    }
+    .meta-group {
+      display: grid;
+      gap: 15px;
+      grid-template-columns: repeat(auto-fit,minmax(150px,1fr));
+    }
+    .file-preview {
+      margin-top: 15px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .file-card {
+      background: #f8f9fa;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 220px;
+      position: relative;
+    }
+    .file-thumb {
+      width: 48px;
+      height: 48px;
+      border-radius: 6px;
+      background: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+      color: #5f6368;
+      flex-shrink: 0;
+    }
+    .file-info {
+      flex: 1;
+      overflow: hidden;
+    }
+    .file-name {
+      font-weight: 500;
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .file-size {
+      font-size: 12px;
+      color: #5f6368;
+    }
+    .remove-file {
+      cursor: pointer;
+      color: #d93025;
+      font-size: 18px;
+      margin-left: 8px;
+    }
+    .share-section {
+      margin-top: 25px;
+      text-align: left;
+    }
+    .alert-success {
+      border-radius: 16px;
+      background: #e6f4ea;
+      border: none;
+      color: #137333;
+    }
+    .toast-message {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #1a73e8;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: 0 6px 18px rgba(60,64,67,0.25);
+      z-index: 1050;
+    }
+    .share-popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 25px;
+      border-radius: 14px;
+      box-shadow: 0 6px 30px rgba(0,0,0,0.2);
+      z-index: 1100;
+      width: 90%;
+      max-width: 450px;
+    }
+    .share-popup.show { display: block; }
+    .popup-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      z-index: 1090;
+      display: none;
+    }
+    .popup-overlay.show { display: block; }
+    .small-note { font-size: 12px; color: #5f6368; }
+  </style>
+</head>
+<body>
+  <div class="upload-container">
+    <h2>📤 Tải lên file</h2>
+
+    <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+      <!-- Drag & Drop -->
+      <div id="dragDrop" class="drag-drop">
+        <div><strong>Kéo và thả file</strong> hoặc <span style="text-decoration: underline; cursor: pointer;" id="browseTrigger">chọn</span> (tối đa 100MB mỗi file)</div>
+        <div class="small-note">Định dạng hỗ trợ: txt, pdf, docx, jpg, png, gif, zip, rar, mp4, mp3</div>
+        <input id="fileInput" type="file" name="file" multiple style="display:none" />
+      </div>
+
+      <!-- Preview chọn file -->
+      <div id="previewArea" class="file-preview"></div>
+
+      <!-- Metadata -->
+      <div class="meta-group mb-3">
+        <div>
+          <label class="form-label">Chọn thư mục:</label>
+          <select class="form-select" name="folder_id">
+            <option value="root">/ (Thư mục gốc)</option>
+            <option value="1">Tài liệu</option>
+            <option value="2">Hình ảnh</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">Chế độ chia sẻ:</label>
+          <select class="form-select" name="privacy" required>
+            <option value="public">Công khai</option>
+            <option value="private">Riêng tư</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">Thời hạn tồn tại:</label>
+          <select class="form-select" name="expire_time">
+            <option value="1">1 ngày</option>
+            <option value="7">7 ngày</option>
+            <option value="30">30 ngày</option>
+            <option value="never" selected>Không xoá</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="meta-group mb-3">
+        <div>
+          <label class="form-label">Giới hạn lượt tải:</label>
+          <input type="number" class="form-control" name="download_limit" placeholder="VD: 5">
+        </div>
+        <div>
+          <label class="form-label">Phân quyền tải (email):</label>
+          <input type="text" class="form-control" name="allowed_emails" placeholder="email1@gmail.com, email2@gmail.com">
+        </div>
+        <div>
+          <label class="form-label">Mật khẩu bảo vệ:</label>
+          <input type="password" class="form-control" name="password" placeholder="Nếu có">
+        </div>
+      </div>
+
+      <div class="d-flex gap-3 flex-wrap">
+        <button type="submit" class="btn btn-primary">Tải lên</button>
+        <a href="/" class="btn btn-outline-secondary">Quay lại</a>
+      </div>
+    </form>
+
+    {% if share_link %}
+    <div class="share-section alert alert-success">
+      <h5>🎉 Tải lên thành công</h5>
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <div class="file-thumb">📁</div>
+        <div style="flex:1;">
+          <div class="small-note">Link chia sẻ:</div>
+          <input type="text" class="form-control" value="{{ share_link }}" readonly onclick="this.select()" />
+        </div>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-primary" onclick="showSharePopup('{{ share_link }}')">Chia sẻ chi tiết</button>
+        <button class="btn btn-outline-secondary" onclick="navigator.clipboard.writeText('{{ share_link }}'); showToast('🗒 Đã copy link!')">Sao chép</button>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Popup chi tiết chia sẻ -->
+  <div class="popup-overlay" id="popupOverlay"></div>
+  <div class="share-popup" id="sharePopup">
+    <h5>🔗 Chi tiết chia sẻ</h5>
+    <p class="small-note mb-1">Link công khai:</p>
+    <div class="d-flex gap-2 mb-3">
+      <input id="popupShareLink" type="text" class="form-control" readonly />
+      <button class="btn btn-primary" onclick="navigator.clipboard.writeText(document.getElementById('popupShareLink').value); showToast('📋 Copy xong!')">Copy</button>
+    </div>
+    <div class="mt-2">
+      <button class="btn btn-outline-secondary" onclick="closeSharePopup()">Đóng</button>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toastContainer"></div>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const dragDrop = document.getElementById('dragDrop');
+    const previewArea = document.getElementById('previewArea');
+    const browseTrigger = document.getElementById('browseTrigger');
+
+    browseTrigger.addEventListener('click', () => fileInput.click());
+
+    dragDrop.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dragDrop.classList.add('dragover');
+    });
+    dragDrop.addEventListener('dragleave', () => dragDrop.classList.remove('dragover'));
+    dragDrop.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dragDrop.classList.remove('dragover');
+      fileInput.files = e.dataTransfer.files;
+      renderPreviews();
+    });
+    fileInput.addEventListener('change', () => renderPreviews());
+
+    function humanFileSize(bytes) {
+      const thresh = 1024;
+      if (Math.abs(bytes) < thresh) return bytes + ' B';
+      const units = ['KB','MB','GB','TB','PB','EB','ZB','YB'];
+      let u = -1;
+      do {
+        bytes /= thresh;
+        ++u;
+      } while(Math.abs(bytes) >= thresh && u < units.length - 1);
+      return bytes.toFixed(1)+' '+units[u];
+    }
+
+    function renderPreviews() {
+      previewArea.innerHTML = '';
+      const files = fileInput.files;
+      if (!files) return;
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i];
+        const card = document.createElement('div');
+        card.className = 'file-card';
+
+        const thumb = document.createElement('div');
+        thumb.className = 'file-thumb';
+        // nếu là ảnh, show preview
+        if (f.type.startsWith('image/')) {
+          const img = document.createElement('img');
+          img.src = URL.createObjectURL(f);
+          img.style.width = '100%';
+          img.style.height = '100%';
+          img.style.objectFit = 'cover';
+          img.style.borderRadius = '6px';
+          thumb.innerHTML = '';
+          thumb.appendChild(img);
+        } else {
+          thumb.textContent = f.name.split('.').pop().toUpperCase();
+        }
+
+        const info = document.createElement('div');
+        info.className = 'file-info';
+        const nameEl = document.createElement('div');
+        nameEl.className = 'file-name';
+        nameEl.textContent = f.name;
+        const sizeEl = document.createElement('div');
+        sizeEl.className = 'file-size';
+        sizeEl.textContent = humanFileSize(f.size);
+        info.appendChild(nameEl);
+        info.appendChild(sizeEl);
+
+        const remove = document.createElement('div');
+        remove.className = 'remove-file';
+        remove.innerHTML = '&times;';
+        remove.title = 'Bỏ file';
+        remove.onclick = () => {
+          // bỏ file bằng cách reset input (đơn giản)
+          const dt = new DataTransfer();
+          for (let j = 0; j < fileInput.files.length; j++) {
+            if (j !== i) dt.items.add(fileInput.files[j]);
+          }
+          fileInput.files = dt.files;
+          renderPreviews();
+        };
+
+        card.appendChild(thumb);
+        card.appendChild(info);
+        card.appendChild(remove);
+        previewArea.appendChild(card);
+      }
+    }
+
+    function showSharePopup(link) {
+      document.getElementById('popupShareLink').value = link;
+      document.getElementById('popupOverlay').classList.add('show');
+      document.getElementById('sharePopup').classList.add('show');
+    }
+
+    function closeSharePopup() {
+      document.getElementById('popupOverlay').classList.remove('show');
+      document.getElementById('sharePopup').classList.remove('show');
+    }
+
+    function showToast(message) {
+      const t = document.createElement('div');
+      t.className = 'toast-message';
+      t.textContent = message;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+  </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+

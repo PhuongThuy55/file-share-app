@@ -18,30 +18,266 @@
       {% endif %}
     {% endwith %}
 
-    <table class="table table-bordered">
-      <thead>
+    {% if files %}
+    <table class="table table-bordered table-hover align-middle text-center">
+      <thead class="table-light">
         <tr>
-          <th>Tên file</th>
+          <th>Tên gốc</th>
+          <th>Lượt tải</th>
+          <th>Hết hạn</th>
+          <th>Giới hạn tải</th>
+          <th>Quyền riêng tư</th>
           <th>Hành động</th>
         </tr>
       </thead>
       <tbody>
         {% for file in files %}
         <tr>
-          <td>{{ file }}</td>
+          <td>{{ file.original_name }}</td>
+          <td>{{ file.downloads }}</td>
           <td>
-            <a href="/download/{{ file }}" class="btn btn-sm btn-primary">Tải xuống</a>
-            <a href="/share/{{ file }}" class="btn btn-sm btn-secondary">Sao chép liên kết</a>
-            <a href="/delete/{{ file }}" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xoá file này?')">Xoá</a>
+            {% if file.expire_date == "never" %}
+              Không
+            {% elif file.is_expired %}
+              <span class="text-danger">Đã hết hạn</span>
+            {% else %}
+              {{ file.expire_date }}
+            {% endif %}
+          </td>
+          <td>{{ file.download_limit if file.download_limit else "Không giới hạn" }}</td>
+          <td>{{ file.privacy }}</td>
+          <td>
+            <a href="{{ url_for('download_file', link=file.stored_name) }}" class="btn btn-sm btn-primary mb-1">Tải xuống</a>
+            <a href="{{ url_for('fetch_share_link', file_id=file.id) }}" class="btn btn-sm btn-secondary mb-1" onclick="copyShareLink(event, this)">Sao chép liên kết</a>
+            <a href="{{ url_for('delete_file', filename=file.stored_name) }}" class="btn btn-sm btn-danger mb-1" onclick="return confirm('Bạn có chắc chắn muốn xoá file này?')">Xoá</a>
           </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
+    {% else %}
+      <p class="text-center">Chưa có file nào được tải lên.</p>
+    {% endif %}
 
     <a href="/" class="btn btn-secondary">Quay lại</a>
   </div>
 
+  <script>
+    async function copyShareLink(event, el) {
+      event.preventDefault();
+      const url = el.href;
+      const response = await fetch(url);
+      const data = await response.json();
+      await navigator.clipboard.writeText(data.share_link);
+      alert("Đã sao chép liên kết: " + data.share_link);
+    }
+  </script>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
+
+
+<!-- <!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Danh sách file</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+  body {
+    background: #f5f7fa;
+    font-family: 'Google Sans', 'Segoe UI', sans-serif;
+    color: #202124;
+  }
+  .list-container {
+    max-width: 1000px;
+    margin: 60px auto;
+    padding: 30px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 25px rgba(60,64,67,0.08);
+  }
+  .file-table {
+    font-size: 14px;
+  }
+  .file-table th {
+    text-transform: uppercase;
+    font-size: 12px;
+    color: #5f6368;
+  }
+  .thumb-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: #e8eaed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;
+    color: #5f6368;
+    flex-shrink: 0;
+  }
+  .meta {
+    font-size: 12px;
+    color: #5f6368;
+  }
+  .btn {
+    border-radius: 24px;
+    font-weight: 500;
+    padding: 6px 16px;
+    font-size: 13px;
+    transition: transform .2s;
+  }
+  .btn:hover {
+    transform: scale(1.04);
+  }
+  .btn-download {
+    background: #1a73e8;
+    color: #fff;
+    border: none;
+  }
+  .btn-download:hover {
+    background: #0c5ed7;
+  }
+</style>
+  
+</head> -->
+<!-- <body>
+  <div class="list-container">
+    <h2>📂 Danh sách file đã tải lên</h2>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="alert alert-info mb-3">
+          {{ messages[0] }}
+        </div>
+      {% endif %}
+    {% endwith %}
+        
+    
+    <table class="table file-table table-hover align-middle">
+    <thead class="table-light">
+      <tr>
+        <th>File</th>
+        <th>Quyền</th>
+        <th>Hết hạn</th>
+        <th>Lượt tải</th>
+        <th>Giới hạn</th>
+        <th>Chia sẻ</th>
+        <th>Hành động</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for f in files %}
+      <tr>
+        <td>
+          <div class="d-flex align-items-center gap-2">
+            <div class="thumb-icon">
+              {% if f.original_name.lower().endswith(('.png','.jpg','.jpeg','.gif')) %}
+                🖼
+              {% elif f.original_name.lower().endswith(('.mp4',)) %}
+                🎬
+              {% elif f.original_name.lower().endswith(('.mp3',)) %}
+                🎵
+              {% else %}
+                📄
+              {% endif %}
+            </div>
+            <div>
+              <div class="fw-semibold">{{ f.original_name }}</div>
+              <div class="meta">Thư mục: {{ f.folder_id }}</div>
+            </div>
+          </div>
+        </td>
+        <td>
+          {% if f.privacy == 'private' %}
+            <span class="badge bg-danger-subtle text-danger">Riêng tư</span>
+          {% else %}
+            <span class="badge bg-primary-subtle text-primary">Công khai</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if f.is_expired %}
+            <span class="text-danger fw-semibold">Đã hết hạn</span>
+          {% else %}
+            {% if f.expire_date != 'never' %}
+              {{ f.expire_date.split('T')[0] }}
+            {% else %}
+              Không
+            {% endif %}
+          {% endif %}
+        </td>
+        <td>{{ f.downloads }}</td>
+        <td>{{ f.download_limit if f.download_limit else "Không giới hạn" }}</td>
+        <td>
+          <button class="btn btn-sm btn-outline-info" onclick="fetchAndShowShare('{{ f.id }}')">Chia sẻ</button>
+        </td>
+        <td>
+          <a href="{{ url_for('download_file', link=f.id) }}" class="btn btn-sm btn-download">Tải xuống</a>
+          <a href="{{ url_for('delete_file', filename=f.stored_name) }}" class="btn btn-sm btn-outline-secondary" onclick="return confirm('Xoá file?')">Xoá</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+    {% if not files %}
+      <div class="text-center text-muted mt-4">Không có file nào được tải lên.</div>
+    {% endif %}
+
+    <div class="mt-4">
+      <a href="/" class="btn btn-outline-secondary">⟵ Quay lại</a>
+    </div>
+  </div>
+
+  
+  <div class="popup-overlay" id="popupOverlay"></div>
+  <div class="share-popup" id="sharePopup">
+    <h5>🔗 Chia sẻ file</h5>
+    <p class="small-note mb-2">Link chia sẻ:</p>
+    <div class="d-flex gap-2 mb-3">
+      <input id="shareInput" type="text" class="form-control" readonly>
+      <button class="btn btn-primary" onclick="navigator.clipboard.writeText(document.getElementById('shareInput').value); showToast('Copied!')">Sao chép</button>
+    </div>
+    <div>
+      <button class="btn btn-outline-secondary" onclick="closeSharePopup()">Đóng</button>
+    </div>
+  </div>
+
+  <div id="toastContainer"></div>
+
+  <script>
+    async function fetchAndShowShare(fileId) {
+      try {
+        const resp = await fetch(`/share_link/${fileId}`);
+        if (!resp.ok) throw new Error('Không lấy được link');
+        const data = await resp.json();
+        showSharePopup(data.share_link);
+      } catch (e) {
+        alert('Lỗi khi tạo link chia sẻ: ' + e.message);
+      }
+    }
+    function showSharePopup(link) {
+      document.getElementById('shareInput').value = link;
+      document.getElementById('popupOverlay').classList.add('show');
+      document.getElementById('sharePopup').classList.add('show');
+    }
+    function closeSharePopup() {
+      document.getElementById('popupOverlay').classList.remove('show');
+      document.getElementById('sharePopup').classList.remove('show');
+    }
+    function showToast(msg) {
+      const t = document.createElement('div');
+      t.className = 'toast-message';
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 2500);
+    }
+  </script>
+</body>
+</html>  -->
+
+
